@@ -14,6 +14,8 @@ function tick(){
             <div>中国</div>
         </div>
     )
+    //element.type='span'
+    //element.something = 1;
     ReactDOM.render(element,document.getElementById('root'))
 }
 
