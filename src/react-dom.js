@@ -23,7 +23,12 @@ function createDOM(vdom) {
 
     //否则 他就是一个虚拟DOM对象了，也就是React元素了
     let { type, props } = vdom;
-    let dom = document.createElement(type);
+    let dom;
+    if (typeof type === 'function') {//自定义的函数组件
+        return mountFunctionComponent(vdom)
+    } else {//原生组件
+        dom = document.createElement(type);
+    }
     //使用虚拟dom的属性更新刚创建出来的真实dom的属性
     updateProps(dom, props);
     //在这处理props.children属性
@@ -46,6 +51,16 @@ function createDOM(vdom) {
     //vdom.dom = dom;
     return dom;
 }
+/**
+ * 把一个类型为自定义函数组件的虚拟DOM转换为真实DOM并返回
+ * @param {*} vdom 类型为自定义函数组件的虚拟DOM
+ */
+function mountFunctionComponent(vdom) {
+    let { type: FunctionComponent, props } = vdom;
+    let renderVdom = FunctionComponent(props);
+    return createDOM(renderVdom)
+}
+
 /**
  * 
  * @param {*} childrenVdom 儿子们的虚拟DOM
