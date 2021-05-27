@@ -1,4 +1,4 @@
-# space-react
+# whale-react
 ## 1. jsx => React.createElement 实现
 ## 2. React元素的只读性
 ## 3. 实现原生组件的DOM渲染
