@@ -1,6 +1,6 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-
+import React from './react';
+import ReactDOM from './react-dom';
+import { updateQueue } from './Component';
 /**
  * 合成事件和批量更新
  * 1.在React里，事件的更新可能是异步的，是批量的，不是同步的
@@ -14,7 +14,17 @@ class Counter extends React.Component {
     super(props);
     this.state = { name: this.props.name, number: 0 };
   }
-  handleClick = () => {
+  handleClick = (syntheticEvent) => {
+    //不同的浏览器event是不一样的，处理浏览器的兼容性
+    syntheticEvent.stop()
+
+    //updateQueue.isBatchingUpdate = true;
+    /*
+    this.setState({ number: this.state.number + 1 }, () => console.log('cb1', this.state.number));
+    console.log(this.state.number);
+    this.setState({ number: this.state.number + 1 }, () => console.log('cb2', this.state.number));
+    console.log(this.state.number);*/
+
     //肯定是批量更新，而且这个回调函数是等全部更新完成后才执行的
     this.setState((lastState) => ({ number: lastState.number + 1 }), () => {
       console.log('callback1', this.state.number);
@@ -37,20 +47,24 @@ class Counter extends React.Component {
       console.log(this.state.number);
     });
 
-    setTimeout(() => {
-      console.log(this.state.number);
-      this.setState({ number: this.state.number + 1 })
-      console.log(this.state.number);
-      this.setState({ number: this.state.number + 1 })
-      console.log(this.state.number);
-    }, 1000);
+    //进行真正的更新
+    //把isBatchingUpdate重置为false
+   //updateQueue.batchUpdate();
+  }
+  handleNameClick = () => {
+    console.log('handleNameClick');
+  }
+  handleNumberClick = () => {
+    console.log('handleNumberClick')
   }
   render() {
     return (
       <div>
-        <p>{this.state.name}</p>
-        <p>{this.state.number}</p>
-        <button onClick={this.handleClick}>+</button>
+        <p onClick={this.handleNameClick}>{this.state.name}</p>
+        <p onClick={this.handleNumberClick}>{this.state.number}</p>
+        <button onClick={this.handleClick}>
+          <span>+</span>
+        </button>
       </div>
     )
   }

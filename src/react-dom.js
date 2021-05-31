@@ -1,3 +1,4 @@
+import { addEvent } from './event';
 /**
  * 1.把vdom虚拟DOM变成真实DOM dom
  * 2.把虚拟DOM上的属性更新或者说同步到dom上
@@ -25,9 +26,9 @@ export function createDOM(vdom) {
     let { type, props } = vdom;
     let dom;
     if (typeof type === 'function') {//自定义的函数组件
-        if(type.isReactComponent){//说明这是一个类组件
+        if (type.isReactComponent) {//说明这是一个类组件
             return mountClassComponent(vdom);
-        }else{//否则说明是一个函数组件
+        } else {//否则说明是一个函数组件
             return mountFunctionComponent(vdom);
         }
     } else {//原生组件
@@ -70,10 +71,9 @@ function mountFunctionComponent(vdom) {
  * 3.把返回的虚拟DOM转成真实DOM进行挂载
  * @param {*} vdom 
  */
-function mountClassComponent(vdom){
+function mountClassComponent(vdom) {
     //解构类定义和类的属性对象
-    let {type, props} = vdom;
-    console.log(props)
+    let { type, props } = vdom;
     //创建类的实例
     let classInstance = new type(props);
     //调用实例的render方法返回要渲染的虚拟DOM对象
@@ -111,10 +111,11 @@ function updateProps(dom, newProps) {
             for (let attr in styleObj) {
                 dom.style[attr] = styleObj[attr];
             }
-        } else if(key.startsWith('on')){
+        } else if (key.startsWith('on')) {
             //给真实DOM加属性的话 onclick
-            dom[key.toLocaleLowerCase()] = newProps[key];
-        }else {//在JS中 dom.className = 'title'
+            //dom[key.toLocaleLowerCase()] = newProps[key];
+            addEvent(dom, key.toLocaleLowerCase(), newProps[key])
+        } else {//在JS中 dom.className = 'title'
             dom[key] = newProps[key];
         }
     }
