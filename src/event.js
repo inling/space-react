@@ -54,6 +54,7 @@ function dispatchEvent(event) {
     for (let key in syntheticEvent) {
         syntheticEvent[key] = null;
     }
+    updateQueue.isBatchingUpdate = false;
     updateQueue.batchUpdate();//批量更新一下
 }
 

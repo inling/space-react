@@ -1,73 +1,102 @@
 import React from './react';
 import ReactDOM from './react-dom';
-import { updateQueue } from './Component';
-/**
- * 合成事件和批量更新
- * 1.在React里，事件的更新可能是异步的，是批量的，不是同步的
- *    调用state之后状态并没有立刻更新，而是先缓存起来了
- *    等事件函数完成后，再进行批量更新，一次更新并重新渲染
- * 因为jsx事件处理函数是react控制的，只要归react控制就是批量，只要不归react管了。就是非批量
- */
 
 class Counter extends React.Component {
+  static defaultProps = { //设置初始属性对象
+    name: '计数器'
+  }
+
   constructor(props) {
     super(props);
-    this.state = { name: this.props.name, number: 0 };
+    this.state = { number: 0 };
+    console.log('Counter 1.constructor 初始化属性和状态对象');
   }
-  handleClick = (syntheticEvent) => {
-    //不同的浏览器event是不一样的，处理浏览器的兼容性
-    syntheticEvent.stop()
 
-    //updateQueue.isBatchingUpdate = true;
-    /*
-    this.setState({ number: this.state.number + 1 }, () => console.log('cb1', this.state.number));
-    console.log(this.state.number);
-    this.setState({ number: this.state.number + 1 }, () => console.log('cb2', this.state.number));
-    console.log(this.state.number);*/
-
-    //肯定是批量更新，而且这个回调函数是等全部更新完成后才执行的
-    this.setState((lastState) => ({ number: lastState.number + 1 }), () => {
-      console.log('callback1', this.state.number);
-    })
-    console.log(this.state.number);
-    this.setState((lastState) => ({ number: lastState.number + 1 }), () => {
-      console.log('callback2', this.state.number);
-    })
-    console.log(this.state.number);
-
-    queueMicrotask(() => {
-      console.log(this.state.number);
-      this.setState((lastState) => ({ number: lastState.number + 1 }), () => {
-        console.log('callback3', this.state.number);
-      })
-      console.log(this.state.number);
-      this.setState((lastState) => ({ number: lastState.number + 1 }), () => {
-        console.log('callback4', this.state.number);
-      })
-      console.log(this.state.number);
-    });
-
-    //进行真正的更新
-    //把isBatchingUpdate重置为false
-   //updateQueue.batchUpdate();
+  componentWillMount() {
+    console.log('Counter 2.componentWillMount 组件将要挂载');
   }
-  handleNameClick = () => {
-    console.log('handleNameClick');
+
+  componentDidMount() {
+    console.log('Counter 4.componentDidMount 组件挂载完成');
   }
-  handleNumberClick = () => {
-    console.log('handleNumberClick')
+
+  handleClick = (event) => {
+    this.setState({ number: this.state.number + 1 });
   }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('Counter 5.shouldComponentUpdate 决定组件是否需要更新？');
+    return nextState.number % 2 === 0; //偶数就是true 奇数false
+  }
+
+  componentWillUpdate() {
+    console.log('Counter 6.componentWillUpdate 组件将要更新');
+  }
+
+  componentDidUpdate() {
+    console.log('Counter 7.componentDidUpdate 组件更新完成');
+  }
+
   render() {
+    console.log('Counter 3.render 重新计算新的虚拟DOM');
     return (
-      <div>
-        <p onClick={this.handleNameClick}>{this.state.name}</p>
-        <p onClick={this.handleNumberClick}>{this.state.number}</p>
+      <div id={`counter-${this.state.number}`}>
+        <p>{this.state.number}</p>
+        {this.state.number % 2 === 0 ? <span></span> : <p></p>}
+        {this.state.number === 4 ? null : <ChildCounter count={this.state.number} />}
         <button onClick={this.handleClick}>
-          <span>+</span>
+          +
         </button>
       </div>
     )
   }
 }
 
-ReactDOM.render(<Counter name="qwe" />, document.getElementById('root'));
+class ChildCounter extends React.Component {
+  componentWillUnmount() {
+    console.log('ChildCounter 8.componentWillUnmount 组件将要卸载');
+  }
+  componentWillMount() {
+    console.log('ChildCounter 1.componentWillMount 组件将要挂载');
+  }
+  componentDidMount() {
+    console.log('ChildCounter 3.componentDidMount 组件挂载完成');
+  }
+  componentWillReceiveProps(newProps) {
+    console.log('ChildCounter 4.componentWillReceiveProps 组件将要接受到新的属性');
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('ChildCounter 5.shouldComponentUpdate 决定组件是否需要更新？');
+    return nextProps.count % 3 === 0; //3的倍数就更新，否则不更新
+  }
+  componentWillUpdate() {
+    console.log('ChildCounter 6.componentWillUpdate 组件将要更新');
+  }
+  componentDidUpdate() {
+    console.log('ChildCounter 7.componentDidUpdate 组件更新完成');
+  }
+  render() {
+    console.log('ChildCounter 2.render');
+    return (
+      <div id="sub-counter">
+        {this.props.count}
+      </div>
+    )
+  }
+}
+
+let element = <Counter />;
+
+ReactDOM.render(element, document.getElementById('root'));
+
+/*
+Counter 1.constructor 初始化属性和状态对象
+Counter 2.componentWillMount 组件将要挂载
+Counter 3.render
+Counter 4.componentDidMount 组件挂载完成
+Counter 5.shouldComponentUpdate 决定组件是否需要更新？
+Counter 5.shouldComponentUpdate 决定组件是否需要更新？
+Counter 6.componentWillUpdate 组件将要更新
+Counter 3.render
+Counter 7.componentDidUpdate 组件更新完成
+*/
